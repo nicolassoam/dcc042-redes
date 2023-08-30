@@ -9,4 +9,4 @@ add_library(library ${SOURCES})
 
 add_executable(main ${SOURCES})
 
-add_compile_options(-std=c++20 -Ofast -fPIC -march=native -fopenmp)
+add_compile_options(-std=c++20 -Ofast -fPIC -march=native)

@@ -3,6 +3,22 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <cstring>
+#include <thread>
+
+void client_handle(int socket_n){
+        // Receive and send data
+        char buffer[1024];
+        ssize_t bytesRead;
+        while ((bytesRead = recv(socket_n, buffer, sizeof(buffer), 0)) > 0) {
+            send(socket_n, buffer, bytesRead, 0);
+        }
+
+        if (bytesRead < 0) {
+            std::cerr << "Error receiving data" << std::endl;
+        }
+
+        close(socket_n);
+}
 
 int main() {
     // Create a socket
@@ -43,22 +59,9 @@ int main() {
         }
 
         std::cout << "Connected to client" << std::endl;
+        std::thread client_thread(client_handle, clientSocket);
+        client_thread.detach();
 
-        // Receive and send data
-        char buffer[1024];
-        ssize_t bytesRead;
-        while ((bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0)) > 0) {
-            send(clientSocket, buffer, bytesRead, 0);
-        }
-
-        if (bytesRead < 0) {
-            std::cerr << "Error receiving data" << std::endl;
-            return -1;
-        }
-
-        // Close the socket
-    
-        close(clientSocket);
     }
     close(serverSocket);
 
