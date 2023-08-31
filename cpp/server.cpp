@@ -1,9 +1,17 @@
 #include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
+#ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #include <sys/types.h>
+#else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <unistd.h>
+#endif
 #include <cstring>
 #include <thread>
+
+
 
 void client_handle(int socket_n){
         // Receive and send data
@@ -14,19 +22,40 @@ void client_handle(int socket_n){
         }
 
         if (bytesRead < 0) {
-            std::cerr << "Error receiving data" << std::endl;
+            std::cerr << "Erro ao receber dados" << std::endl;
         }
-
-        close(socket_n);
+        #ifdef _WIN32
+            closesocket(socket_n);
+            WSACleanup();
+        #else
+            close(socket_n);
+        #endif
 }
 
 int main() {
-    // Create a socket
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (serverSocket < 0) {
-        std::cerr << "Error creating socket" << std::endl;
-        return -1;
-    }
+
+    #ifdef _WIN32
+        WSAData wsaData;
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+            std::cerr << "Winsock não iniciou." << std::endl;
+            return -1;
+        }
+    #endif
+
+    // Cria socket
+    #ifdef _WIN32
+        SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+        if (serverSocket == INVALID_SOCKET) {
+            std::cerr << "Erro ao criar socket" << std::endl;
+            return -1;
+        }
+    #else
+        int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+        if (serverSocket < 0) {
+            std::cerr << "Erro ao criar socket" << std::endl;
+            return -1;
+        }
+    #endif
 
     // Set up the server address and port
     struct sockaddr_in serverAddress;
@@ -42,28 +71,43 @@ int main() {
 
     // Listen for incoming connections
     if (listen(serverSocket, 5) < 0) {
-        std::cerr << "Error listening for connections" << std::endl;
+        std::cerr << "Erro ao tentar ouvir conexões" << std::endl;
         return -1;
     }
 
-    std::cout << "Server listening on port 8080" << std::endl;
+    std::cout << "Servidor no port 8080" << std::endl;
 
     // Accept incoming connections
     while(true){
         struct sockaddr_in clientAddress;
         socklen_t clientAddressLength = sizeof(clientAddress);
-        int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
-        if (clientSocket < 0) {
-            std::cerr << "Error accepting connection" << std::endl;
-            return -1;
-        }
 
-        std::cout << "Connected to client" << std::endl;
+        #ifdef _WIN32
+            SOCKET clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
+            if (clientSocket == INVALID_SOCKET) {
+                std::cerr << "Erro ao aceitar conexões" << std::endl;
+                return -1;
+            }
+        #else
+            int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
+            if (clientSocket < 0) {
+                std::cerr << "Erro ao aceitar conexões" << std::endl;
+                return -1;
+            }
+        #endif
+
+        std::cout << "Conectado a client" << std::endl;
         std::thread client_thread(client_handle, clientSocket);
         client_thread.detach();
 
     }
-    close(serverSocket);
+
+    #ifdef _WIN32
+        closesocket(serverSocket);
+        WSACleanup();
+    #else
+        close(serverSocket);
+    #endif
 
     return 0;
 }
