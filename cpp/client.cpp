@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
         //     strcat(message, argv[i]);
         //     strcat(message, " ");
         // }
-        
+        std::cout << "Insira uma mensagem (ou quit para sair):" << std::endl;
         std::cin >> message;
 
         ssize_t bytesSent = send(clientSocket, message.c_str(), strlen(message.c_str()), 0);
