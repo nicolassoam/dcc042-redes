@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
         // }
         std::cout << "Insira uma mensagem (ou quit para sair):" << std::endl;
         std::cin >> message;
-
+        
         ssize_t bytesSent = send(clientSocket, message.c_str(), strlen(message.c_str()), 0);
         if (bytesSent < 0) {
             std::cerr << "Error sending data" << std::endl;
@@ -75,11 +75,13 @@ int main(int argc, char** argv) {
             return -1;
         }
 
+        
         // Print the response
         std::cout << "Response from server: " << buffer << std::endl;
-        if(message == "quit") break;
+        
         //clear buffer
         memset(buffer, 0, sizeof(buffer));
+        if(message == "quit") break;
     }
     // Close the socket
     #ifdef _WIN32

@@ -17,16 +17,24 @@ void client_handle(int socket_n){
         // Receive and send data
         char buffer[1024];
         ssize_t bytesRead;
-        while ((bytesRead = recv(socket_n, buffer, sizeof(buffer), 0)) > 0) {
-            send(socket_n, buffer, bytesRead, 0);
+        // while ((bytesRead = recv(socket_n, buffer, sizeof(buffer), 0)) > 0) {
+        //     send(socket_n, buffer, bytesRead, 0);
+        // }
+
+        while(true){
+            bytesRead = recv(socket_n, buffer, sizeof(buffer), 0);
+            if(bytesRead == 0){
+                break;
+            } else if(bytesRead < 0){
+                std::cerr << "Erro ao receber dados" << std::endl;
+                break;
+            } else {
+                send(socket_n, buffer, bytesRead, 0);
+            }
         }
 
-        if (bytesRead < 0) {
-            std::cerr << "Erro ao receber dados" << std::endl;
-        }
         #ifdef _WIN32
             closesocket(socket_n);
-            WSACleanup();
         #else
             close(socket_n);
         #endif
@@ -96,7 +104,7 @@ int main() {
             }
         #endif
 
-        std::cout << "Conectado a client: " << clientAddress.sin_family << std::endl;
+        std::cout << "Conectado a client: " << clientAddress.sin_addr.s_addr << std::endl;
         std::thread client_thread(client_handle, clientSocket);
         client_thread.detach();
 
