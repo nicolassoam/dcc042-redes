@@ -7,7 +7,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
     client.connect((HOST, PORT))
     # client.sendall(b'AAAAAAAAAAAAAAAAAAAAAAA')
     while True:
-        data = input("Escreva echo para enviar uma mensagem ou quit para sair:")
+        data = input("Escolha um dos comandos a seguir: \n- Echo \n- Quit \n\n")
         data = data.strip().lower()
         if not data:
             break   
@@ -16,9 +16,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
             break
 
         if data == "echo":
-            message = input("Insira uma mensagem (ou escreva quit para sair): ")
+            message = input("Insira uma mensagem: ")
+
+        else:
+            print("Comando inválido!\n")
+            continue
        
         client.sendall(message.encode())
         data = client.recv(1024).decode()
-        print(f"Received from server: {data}")
+        print(f"Received from server: {data}\n")
 
