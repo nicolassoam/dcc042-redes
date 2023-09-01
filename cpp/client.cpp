@@ -52,14 +52,16 @@ int main(int argc, char** argv) {
 
     // Send data to the server
     while(true){
-        char *message = new char[2040];
+        std::string message = "";
         
-        for(int i = 1; i < argc; i++){
-            strcat(message, argv[i]);
-            strcat(message, " ");
-        }
+        // for(int i = 1; i < argc; i++){
+        //     strcat(message, argv[i]);
+        //     strcat(message, " ");
+        // }
         
-        ssize_t bytesSent = send(clientSocket, message, strlen(message), 0);
+        std::cin >> message;
+
+        ssize_t bytesSent = send(clientSocket, message.c_str(), strlen(message.c_str()), 0);
         if (bytesSent < 0) {
             std::cerr << "Error sending data" << std::endl;
             return -1;
@@ -75,6 +77,9 @@ int main(int argc, char** argv) {
 
         // Print the response
         std::cout << "Response from server: " << buffer << std::endl;
+        if(message == "quit") break;
+        //clear buffer
+        memset(buffer, 0, sizeof(buffer));
     }
     // Close the socket
     #ifdef _WIN32

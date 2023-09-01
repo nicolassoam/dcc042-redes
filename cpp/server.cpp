@@ -96,7 +96,7 @@ int main() {
             }
         #endif
 
-        std::cout << "Conectado a client" << std::endl;
+        std::cout << "Conectado a client: " << clientAddress.sin_family << std::endl;
         std::thread client_thread(client_handle, clientSocket);
         client_thread.detach();
 
